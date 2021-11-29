@@ -1,10 +1,9 @@
 package app
 
+import "log"
+
 func (server *MainServer) InitRouts() {
-	server.router.GET("/api/test", server.Test)
-
-}
-
-func Test() {
+	log.Printf("init routes....\n")
+	server.router.GET("/service/price", server.Test)
 
 }

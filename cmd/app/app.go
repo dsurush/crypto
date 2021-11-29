@@ -3,8 +3,8 @@ package app
 import (
 	"cryptotest/pkg/service"
 	"database/sql"
-	"fmt"
 	"github.com/julienschmidt/httprouter"
+	"log"
 	"net/http"
 	"time"
 )
@@ -20,9 +20,10 @@ func NewMainServer(pool *sql.DB, router *httprouter.Router, workerService *servi
 }
 
 func (server *MainServer) Start() {
+	log.Printf("Server is starting...\n")
+	server.WorkerService.GenerateCombination()
 	server.InitRouts()
-	go service.Worker(15*time.Second, true, server.WorkerService.GenerateCombination)
-	fmt.Println("a")
+	go service.Worker(3*time.Minute, true, server.WorkerService.GenerateCombination)
 	panic(http.ListenAndServe(":8888", server))
 }
 

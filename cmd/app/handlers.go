@@ -29,6 +29,7 @@ func (server *MainServer) Test(writer http.ResponseWriter, request *http.Request
 		err := json.Unmarshal([]byte(str), &data)
 		if err != nil {
 			log.Printf("Can't Unmarshal in Api err %e\n", err)
+			writer.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		err = json.NewEncoder(writer).Encode(data)
