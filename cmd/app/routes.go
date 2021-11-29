@@ -7,7 +7,7 @@ import (
 )
 
 func (server *MainServer) InitRouts() {
-	Test()
+	server.WorkerService.GenerateCombination()
 	server.router.GET("/api/test", server.Test)
 	log.Println(http.ListenAndServe(":8888", server))
 }

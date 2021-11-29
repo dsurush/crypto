@@ -1,17 +1,19 @@
 package app
 
 import (
+	"cryptotest/pkg/service"
+	"database/sql"
 	"github.com/julienschmidt/httprouter"
-	"gorm.io/gorm"
 	"net/http"
 )
 type MainServer struct {
-	pool *gorm.DB
+	pool *sql.DB
 	router *httprouter.Router
+	WorkerService *service.Svc
 }
 
-func NewMainServer(pool *gorm.DB, router *httprouter.Router) *MainServer {
-	return &MainServer{pool: pool, router: router}
+func NewMainServer(pool *sql.DB, router *httprouter.Router, workerService *service.Svc) *MainServer {
+	return &MainServer{pool: pool, router: router, WorkerService: workerService}
 }
 
 

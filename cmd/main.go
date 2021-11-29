@@ -3,6 +3,7 @@ package main
 import (
 	"cryptotest/cmd/app"
 	"cryptotest/database"
+	"cryptotest/pkg/service"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 )
@@ -14,7 +15,10 @@ func main() {
 
 func Start()  {
 	db := database.GetDBConnection()
+	defer db.Close()
 	router := httprouter.New()
-	server := app.NewMainServer(db, router)
+	service := service.NewSvc(db)
+	server := app.NewMainServer(db, router, service)
+
 	server.Start()
 }
