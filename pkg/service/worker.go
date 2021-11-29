@@ -7,7 +7,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"gorm.io/gorm"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"sync/atomic"
@@ -22,19 +22,25 @@ func NewSvc(pool *sql.DB) *Svc {
 	return &Svc{pool: pool}
 }
 
-type GormModel struct {
-	gorm.Model
+type ErrorRes struct {
+	Response string `json:"Response"`
 }
 
-func (svc *Svc) InsertNewCurr(Curr2Curr, RawDisp string) (){
+func (svc *Svc) InsertNewCurr(Curr2Curr, RawDisp string) {
 	_, err := svc.pool.Exec(database.InsertInfo, Curr2Curr, RawDisp)
 	if err != nil {
 		log.Printf("Can't InsertNewCurr %e", err)
 	}
 }
 
-func (svc *Svc) UpdateCurr(Curr2Curr, RawDisp string)  {
-	_, err := svc.pool.Exec(database.UpdateInfo,  RawDisp, Curr2Curr)
+func (svc *Svc) GetFromDBCurr(Curr2Curr string) string {
+	var data string
+	_ = svc.pool.QueryRow(database.GetFromDBInfo, Curr2Curr).Scan(&data)
+	return data
+}
+
+func (svc *Svc) UpdateCurr(Curr2Curr, RawDisp string) {
+	_, err := svc.pool.Exec(database.UpdateInfo, RawDisp, Curr2Curr)
 	if err != nil {
 		log.Printf("Can't Update Curr %e", err)
 	}
@@ -55,12 +61,13 @@ func (svc *Svc) DoUpdate(fsym, tsym, rawDisplay string) {
 	if err != nil {
 		return
 	}
-	if ok == 1{
-		svc.UpdateCurr(fsym + tsym, rawDisplay)
+	if ok == 1 {
+		svc.UpdateCurr(fsym+tsym, rawDisplay)
 	} else {
-		svc.InsertNewCurr(fsym + tsym, rawDisplay)
+		svc.InsertNewCurr(fsym+tsym, rawDisplay)
 	}
 }
+
 // Worker - воркер который запускает каждые d(duration) функцию f если он еще не запущен
 func Worker(d time.Duration, async bool, f func()) {
 	var reentranceFlag int64
@@ -80,14 +87,11 @@ func Worker(d time.Duration, async bool, f func()) {
 	}
 }
 
-
-
 func (receiver *Svc) GenerateCombination() {
 	currency := settings.ReadCurrency(`..\cryptotest\settings\currency.json`)
-	for _, Fsym := range currency.Fsyms{
-		for _, Tsym := range currency.Tsyms{
-			log.Println(Fsym+Tsym)
-			//TODO: GO
+	for _, Fsym := range currency.Fsyms {
+		for _, Tsym := range currency.Tsyms {
+			log.Println(Fsym + Tsym)
 			func() {
 				ok, resp := DoRequest(Fsym, Tsym)
 				if !ok {
@@ -105,6 +109,7 @@ func (receiver *Svc) GenerateCombination() {
 	}
 }
 
+
 func DoRequest(fsyms, tsyms string) (bool, models.Resp) {
 	client := &http.Client{}
 	data := models.Resp{}
@@ -121,17 +126,28 @@ func DoRequest(fsyms, tsyms string) (bool, models.Resp) {
 		return false, data
 	}
 	if resp.StatusCode == http.StatusOK {
-		err := json.NewDecoder(resp.Body).Decode(&data)
+		allData, _ := ioutil.ReadAll(resp.Body)
+		var ErrorRes ErrorRes
+		err := json.Unmarshal(allData, &ErrorRes)
 		if err != nil {
-			fmt.Println("json invalid err = ", err)
+			log.Println("json invalid err = ", err)
 			return false, data
 		}
-		fmt.Println(data)
+		if ErrorRes.Response != ""{
+			log.Println("Response is Error", err)
+			return false, data
+		}
+		err = json.Unmarshal(allData, &data)
+		if err != nil {
+			log.Println("json invalid err = ", err)
+			return false, data
+		}
+		log.Println(data)
 		return true, data
 	}
 	return false, data
 }
 
-func SendHello()  {
+func SendHello() {
 	fmt.Println("hello")
 }

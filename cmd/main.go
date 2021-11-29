@@ -13,12 +13,11 @@ func main() {
 	Start()
 }
 
-func Start()  {
+func Start() {
 	db := database.GetDBConnection()
 	defer db.Close()
 	router := httprouter.New()
 	service := service.NewSvc(db)
 	server := app.NewMainServer(db, router, service)
-
 	server.Start()
 }

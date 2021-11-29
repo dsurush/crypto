@@ -10,7 +10,7 @@ type Currency struct {
 	HIGH24HOUR      float64 `json:"HIGH24HOUR"`
 	PRICE           float64 `json:"PRICE"`
 	LASTUPDATE      int64   `json:"LASTUPDATE"`
-	SUPPLY          float64     `json:"SUPPLY"`
+	SUPPLY          float64 `json:"SUPPLY"`
 	MKTCAP          float64 `json:"MKTCAP"`
 }
 
@@ -25,8 +25,8 @@ type Display struct {
 	PRICE           string `json:"PRICE"`
 	FROMSYMBOL      string `json:"FROMSYMBOL"`
 	TOSYMBOL        string `json:"TOSYMBOL"`
-	LASTUPDATE      string   `json:"LASTUPDATE"`
-	SUPPLY          string     `json:"SUPPLY"`
+	LASTUPDATE      string `json:"LASTUPDATE"`
+	SUPPLY          string `json:"SUPPLY"`
 	MKTCAP          string `json:"MKTCAP"`
 }
 
